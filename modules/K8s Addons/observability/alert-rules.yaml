@@ -1,0 +1,29 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: pakalspot-alert-rules
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+
+spec:
+  groups:
+    - name: pakalspot.rules
+      rules:
+        - alert: HighCPUUsage
+          expr: rate(process_cpu_seconds_total{job="pakalspot-backend"}[2m]) * 100 > 60
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High CPU usage on PakalSpot"
+            description: "CPU usage > 60% for more than 2 minutes."
+
+        - alert: HighErrorRate
+          expr: rate(http_requests_total{job="pakalspot-backend",status!~"2.."}[5m]) > 0.05
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "High error rate detected on PakalSpot backend"
+            description: "More than 5% of requests returned non-2xx responses."
