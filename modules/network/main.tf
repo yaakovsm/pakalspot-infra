@@ -13,6 +13,7 @@ module "vpc" {
   create_database_subnet_route_table = true
 
   enable_nat_gateway = var.enable_nat_gateway
+  map_public_ip_on_launch = true
 
   public_subnet_tags = {
     "kubernetes.io/role/elb" = "1"

@@ -1,0 +1,38 @@
+# Local .terraform directories
+**/.terraform/*
+
+# Terraform state files
+*.tfstate
+*.tfstate.*
+
+# Crash log files
+crash.log
+crash.*.log
+
+# Exclude all .tfvars files (these often contain secrets)
+*.tfvars
+*.tfvars.json
+
+# Override files (sensitive or machine-specific)
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Plan output files
+*.plan
+
+# Module and provider lock file (optional — keep if you want reproducible builds)
+.terraform.lock.hcl
+
+# Ignore local environment variable files
+.env
+.env.*
+
+# macOS / Windows noise
+.DS_Store
+Thumbs.db
+
+# VSCode / JetBrains IDE project files
+.vscode/
+.idea/
