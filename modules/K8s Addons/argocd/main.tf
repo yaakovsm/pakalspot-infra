@@ -35,15 +35,15 @@ resource "helm_release" "argocd" {
     yamlencode({
       configs = {
         params = {
-          "server.insecure" = var.argocd_insecure 
+          "server.insecure" = var.argocd_insecure
         }
       }
 
       server = {
         service = {
-          type = var.argocd_service_type 
+          type = var.argocd_service_type
           annotations = {
-            "service.beta.kubernetes.io/aws-load-balancer-type" = "external"
+            "service.beta.kubernetes.io/aws-load-balancer-type"   = "external"
             "service.beta.kubernetes.io/aws-load-balancer-scheme" = "internet-facing"
           }
         }
@@ -54,6 +54,4 @@ resource "helm_release" "argocd" {
       }
     })
   ]
-
-  depends_on = []
 }
