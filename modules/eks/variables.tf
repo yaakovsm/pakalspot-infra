@@ -32,6 +32,10 @@ variable "subnet_ids" {
     description = "The IDs of the subnets"
     type = list(string)
 }
+variable "private_subnet_ids" {
+    description = "The IDs of the private subnets"
+    type = list(string)
+}
 variable "node_group_name" {
     description = "The name of the node group"
     type = string
@@ -66,4 +70,24 @@ variable "common_tags" {
     description = "Common tags"
     type = map(string)
     default = {}
+}
+variable "capacity_type" {
+    description = "Type of capacity associated with the EKS Node Group. Valid values: ON_DEMAND, SPOT"
+    type = string
+    default = "ON_DEMAND"
+}
+variable "disk_size" {
+    description = "Disk size in GiB for worker nodes"
+    type = number
+    default = 20
+}
+variable "update_config" {
+    description = "Configuration block for node group updates"
+    type = object({
+        max_unavailable_percentage = optional(number)
+        max_unavailable            = optional(number)
+    })
+    default = {
+        max_unavailable = 1
+    }
 }

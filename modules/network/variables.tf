@@ -40,6 +40,11 @@ variable "enable_nat_gateway" {
   default     = true
 }
 
+variable "cluster_name" {
+  description = "The name of the EKS cluster (used for subnet tagging)"
+  type        = string
+  default     = ""
+}
 
 variable "common_tags" {
   description = "Common tags"

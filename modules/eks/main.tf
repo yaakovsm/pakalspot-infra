@@ -7,9 +7,7 @@ module "eks" {
 
   addons = {
     coredns                 = {}
-    eks-pod-identity-agent = {
-      before_compute = true
-    }
+    eks-pod-identity-agent = {}
     kube-proxy              = {}
     vpc-cni                 = {
       before_compute = true
@@ -26,18 +24,24 @@ module "eks" {
   subnet_ids               = var.subnet_ids
 
   eks_managed_node_groups = {
-    (var.node_group_name) = {
-      
-      ami_type       = var.ami_type
-      instance_types = var.instance_types
+  (var.node_group_name) = {
+    subnet_ids = var.private_subnet_ids
+    
+    ami_type       = var.ami_type
+    instance_types = var.instance_types
+    capacity_type  = var.capacity_type
+    disk_size      = var.disk_size
 
-      min_size     = var.min_size
-      max_size     = var.max_size
-      desired_size = var.desired_size
-      iam_role_additional_policies = {
+    min_size     = var.min_size
+    max_size     = var.max_size
+    desired_size = var.desired_size
+    
+    update_config = var.update_config
+    
+    iam_role_additional_policies = {
     }
   }
-  }
+}
 
     tags = var.common_tags
 }

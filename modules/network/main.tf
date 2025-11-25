@@ -15,13 +15,23 @@ module "vpc" {
   enable_nat_gateway = var.enable_nat_gateway
   map_public_ip_on_launch = true
 
-  public_subnet_tags = {
-    "kubernetes.io/role/elb" = "1"
-  }
+  public_subnet_tags = merge(
+    {
+      "kubernetes.io/role/elb" = "1"
+    },
+    var.cluster_name != "" ? {
+      "kubernetes.io/cluster/${var.cluster_name}" = "shared"
+    } : {}
+  )
 
-  private_subnet_tags = {
-    "kubernetes.io/role/internal-elb" = "1"
-  }
+  private_subnet_tags = merge(
+    {
+      "kubernetes.io/role/internal-elb" = "1"
+    },
+    var.cluster_name != "" ? {
+      "kubernetes.io/cluster/${var.cluster_name}" = "shared"
+    } : {}
+  )
 
   database_subnet_tags = {
     "kubernetes.io/role/internal-elb" = "1"

@@ -7,6 +7,7 @@ module "networking" {
   private_subnets    = var.private_subnets
   database_subnets   = var.database_subnets
   enable_nat_gateway = var.enable_nat_gateway
+  cluster_name       = var.cluster_name
   common_tags        = var.common_tags
 }
 
@@ -18,8 +19,9 @@ module "eks" {
   endpoint_public_access                   = var.endpoint_public_access
   enable_cluster_creator_admin_permissions = var.enable_cluster_creator_admin_permissions
 
-  vpc_id     = module.networking.vpc_id
-  subnet_ids = module.networking.subnet_ids
+  vpc_id             = module.networking.vpc_id
+  subnet_ids         = module.networking.subnet_ids
+  private_subnet_ids = module.networking.private_subnets
 
   node_group_name = var.node_group_name
   ami_type        = var.ami_type
@@ -27,6 +29,8 @@ module "eks" {
   min_size        = var.min_size
   max_size        = var.max_size
   desired_size    = var.desired_size
+  capacity_type   = var.capacity_type
+  disk_size       = var.disk_size
 
   common_tags = var.common_tags
 }
