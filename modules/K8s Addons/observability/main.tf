@@ -12,8 +12,9 @@ resource "helm_release" "prometheus_stack" {
     file("${path.module}/values.yaml")
   ]
 
-  wait = true
-  timeout = 600
+  wait    = var.wait_for_helm
+  timeout = var.helm_timeout
+  atomic  = false
 }
 
 resource "null_resource" "cleanup_pvcs" {
@@ -54,7 +55,7 @@ resource "kubectl_manifest" "monitoring_secretstore" {
   YAML
 
   depends_on = [helm_release.prometheus_stack]
-  wait = true
+  wait              = var.wait_for_kubectl
   server_side_apply = false
 }
 
@@ -82,7 +83,7 @@ resource "kubectl_manifest" "gmail_secret" {
   YAML
 
   depends_on = [kubectl_manifest.monitoring_secretstore]
-  wait = true
+  wait              = var.wait_for_kubectl
   server_side_apply = false
 }
 
@@ -94,7 +95,7 @@ resource "kubectl_manifest" "alert_rules" {
     helm_release.prometheus_stack  # Only needs Helm release - CRDs come from it
   ]
   
-  wait = true
+  wait              = var.wait_for_kubectl
   server_side_apply = false
 }
 
@@ -108,7 +109,7 @@ resource "kubectl_manifest" "alertmanager_config" {
     kubectl_manifest.alert_rules
   ]
   
-  wait = true
+  wait              = var.wait_for_kubectl
   server_side_apply = false
 }
 

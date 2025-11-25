@@ -313,6 +313,9 @@ resource "helm_release" "aws_load_balancer_controller" {
   version    = var.alb_controller_version
   namespace  = "kube-system"
 
+  wait    = var.wait_for_helm
+  timeout = var.helm_timeout
+
   values = [
     yamlencode({
       clusterName = var.cluster_name
@@ -323,7 +326,7 @@ resource "helm_release" "aws_load_balancer_controller" {
           "eks.amazonaws.com/role-arn" = module.aws_load_balancer_controller_irsa.iam_role_arn
         }
       }
-      region = "us-east-1"  # אתה כבר ב-us-east-1 לפי ה-cluster endpoint
+      region = "us-east-1"
       vpcId  = var.vpc_id
     })
   ]

@@ -31,6 +31,13 @@ module "eks" {
   common_tags = var.common_tags
 }
 
+# Wait for EKS cluster to be fully ready before deploying Helm releases
+resource "time_sleep" "wait_for_cluster" {
+  depends_on = [module.eks]
+
+  create_duration = var.cluster_wait_duration
+}
+
 module "eso-irsa" {
   source            = "../../modules/eso-irsa"
   oidc_provider_arn = module.eks.oidc_provider_arn
@@ -47,7 +54,10 @@ module "aws-load-balancer-controller" {
   vpc_id            = module.networking.vpc_id
   common_tags       = var.common_tags
 
-  depends_on = [module.eks]
+  wait_for_helm = var.wait_for_helm_releases
+  helm_timeout  = var.helm_timeout
+
+  depends_on = [module.eks, time_sleep.wait_for_cluster]
 }
 
 module "external-secrets" {
@@ -59,7 +69,10 @@ module "external-secrets" {
 
   common_tags = var.common_tags
 
-  depends_on = [module.eks, module.eso-irsa]
+  wait_for_helm = var.wait_for_helm_releases
+  helm_timeout  = var.helm_timeout
+
+  depends_on = [module.eks, module.eso-irsa, time_sleep.wait_for_cluster, module.aws-load-balancer-controller]
 }
 
 module "rds" {
@@ -119,6 +132,9 @@ module "argocd" {
   cluster_name = var.cluster_name
   common_tags  = var.common_tags
 
+  wait_for_helm = var.wait_for_helm_releases
+  helm_timeout  = var.helm_timeout
+
   depends_on = [
     module.eks,
     module.aws-load-balancer-controller
@@ -130,6 +146,10 @@ module "observability" {
 
   aws_region  = var.aws_region
   common_tags = var.common_tags
+
+  wait_for_helm    = var.wait_for_helm_releases
+  helm_timeout     = var.helm_timeout
+  wait_for_kubectl = var.wait_for_kubectl_manifests
 
   depends_on = [
     module.eks,

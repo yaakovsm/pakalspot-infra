@@ -246,3 +246,27 @@ variable "api_gateway_nlb_name" {
   type        = string
   default     = ""
 }
+
+variable "wait_for_helm_releases" {
+  description = "Whether to wait for Helm releases to be ready (set to false for faster dev deployments)"
+  type        = bool
+  default     = false
+}
+
+variable "helm_timeout" {
+  description = "Timeout in seconds for Helm releases (reduced for dev)"
+  type        = number
+  default     = 300
+}
+
+variable "wait_for_kubectl_manifests" {
+  description = "Whether to wait for kubectl manifests to be ready (set to false for faster dev deployments)"
+  type        = bool
+  default     = false
+}
+
+variable "cluster_wait_duration" {
+  description = "Duration to wait for EKS cluster to be ready before deploying Helm releases (reduced for dev)"
+  type        = string
+  default     = "10s"
+}

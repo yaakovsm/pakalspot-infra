@@ -31,6 +31,9 @@ resource "helm_release" "argocd" {
   namespace        = var.argocd_namespace
   create_namespace = true
 
+  wait    = var.wait_for_helm
+  timeout = var.helm_timeout
+  
   values = [
     yamlencode({
       configs = {

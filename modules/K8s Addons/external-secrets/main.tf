@@ -6,6 +6,9 @@ resource "helm_release" "external_secrets" {
   namespace        = var.external_secrets_namespace
   create_namespace = true
 
+  wait    = var.wait_for_helm
+  timeout = var.helm_timeout
+
   values = [
     yamlencode({
       serviceAccount = {

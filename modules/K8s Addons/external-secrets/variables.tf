@@ -20,3 +20,15 @@ variable "external_secrets_namespace" {
   type        = string
   default     = "external-secrets"
 }
+
+variable "wait_for_helm" {
+  description = "Whether to wait for Helm releases to be ready"
+  type        = bool
+  default     = true
+}
+
+variable "helm_timeout" {
+  description = "Timeout in seconds for Helm releases"
+  type        = number
+  default     = 600
+}

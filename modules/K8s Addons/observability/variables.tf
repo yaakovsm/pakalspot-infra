@@ -9,3 +9,21 @@ variable "common_tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "wait_for_helm" {
+  description = "Whether to wait for Helm releases to be ready"
+  type        = bool
+  default     = true
+}
+
+variable "helm_timeout" {
+  description = "Timeout in seconds for Helm releases"
+  type        = number
+  default     = 600
+}
+
+variable "wait_for_kubectl" {
+  description = "Whether to wait for kubectl manifests to be ready"
+  type        = bool
+  default     = true
+}

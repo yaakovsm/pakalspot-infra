@@ -14,6 +14,11 @@ terraform {
       source  = "hashicorp/helm"
       version = "~> 2.13"
     }
+
+    time = {
+      source  = "hashicorp/time"
+      version = "~> 0.11"
+    }
   }
 }
 
@@ -29,7 +34,15 @@ provider "kubernetes" {
   exec {
     api_version = "client.authentication.k8s.io/v1beta1"
     command     = "aws"
-    args        = ["eks", "get-token", "--cluster-name", var.cluster_name]
+    args = [
+      "eks", "get-token",
+      "--cluster-name", var.cluster_name,
+      "--region", var.aws_region
+    ]
+
+    env = {
+      AWS_PROFILE = var.aws_profile
+    }
   }
 }
 
@@ -41,7 +54,15 @@ provider "helm" {
     exec {
       api_version = "client.authentication.k8s.io/v1beta1"
       command     = "aws"
-      args        = ["eks", "get-token", "--cluster-name", var.cluster_name]
+      args = [
+        "eks", "get-token",
+        "--cluster-name", var.cluster_name,
+        "--region", var.aws_region
+      ]
+
+      env = {
+        AWS_PROFILE = var.aws_profile
+      }
     }
   }
 }
