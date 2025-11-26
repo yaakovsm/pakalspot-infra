@@ -73,6 +73,10 @@ variable "eks_security_group_id" {
     description = "EKS cluster security group ID to allow database access"
     type = string
 }
+variable "eks_node_security_group_id" {
+    description = "EKS node group security group ID to allow database access from pods"
+    type = string
+}
 variable "common_tags" {
     description = "Common tags"
     type = map(string)

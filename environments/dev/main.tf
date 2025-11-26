@@ -97,6 +97,7 @@ module "rds" {
   vpc_cidr                   = module.networking.vpc_cidr_block
   database_subnet_group_name = module.networking.database_subnet_group_name
   eks_security_group_id      = module.eks.cluster_security_group_id
+  eks_node_security_group_id = module.eks.node_security_group_id
 
   common_tags = var.common_tags
 
