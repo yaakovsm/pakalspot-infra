@@ -7,7 +7,7 @@ data "aws_lb" "backend_nlb" {
 
 # Use provided ARN or lookup result
 locals {
-  nlb_arn = var.nlb_arn != "" ? var.nlb_arn : (var.nlb_name != "" && length(data.aws_lb.backend_nlb) > 0 ? data.aws_lb.backend_nlb[0].arn : "")
+  nlb_arn      = var.nlb_arn != "" ? var.nlb_arn : (var.nlb_name != "" && length(data.aws_lb.backend_nlb) > 0 ? data.aws_lb.backend_nlb[0].arn : "")
   nlb_dns_name = var.nlb_arn != "" ? null : (var.nlb_name != "" && length(data.aws_lb.backend_nlb) > 0 ? data.aws_lb.backend_nlb[0].dns_name : null)
   # For integration URI, we need DNS name
   # If NLB name is provided but not found yet, use a placeholder that can be updated later
@@ -68,7 +68,7 @@ resource "aws_apigatewayv2_api" "main" {
     allow_origins = ["*"]
     allow_methods = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
     allow_headers = ["*"]
-    max_age      = 300
+    max_age       = 300
   }
 
   tags = var.common_tags
@@ -87,7 +87,7 @@ resource "aws_apigatewayv2_integration" "backend" {
   connection_type        = "VPC_LINK"
   connection_id          = aws_apigatewayv2_vpc_link.main.id
   payload_format_version = "1.0"
-  
+
   # Allow updates to integration_uri when NLB is created
   lifecycle {
     ignore_changes = [integration_uri]

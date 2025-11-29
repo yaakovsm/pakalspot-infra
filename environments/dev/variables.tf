@@ -219,6 +219,10 @@ variable "s3_bucket_name" {
   type        = string
   default     = "pakalspot-photos-dev"
 }
+variable "backend_s3_principal_arn" {
+  description = "IAM ARN (user/role) that can read/write to pakalspot-photos"
+  type        = string
+}
 # ArgoCD variables
 variable "argocd_version" {
   description = "The version of the ArgoCD Helm chart"
@@ -279,4 +283,31 @@ variable "cluster_wait_duration" {
   description = "Duration to wait for EKS cluster to be ready before deploying Helm releases (reduced for dev)"
   type        = string
   default     = "10s"
+}
+
+# Route 53 variables
+# NOTE: Route53 A records pointing to ALB are managed manually, not by Terraform
+# These variables are only used for ACM certificate DNS validation records
+variable "route53_hosted_zone_id" {
+  description = "The Route 53 hosted zone ID for pakalspot.com. Required for ACM certificate DNS validation. Leave empty to auto-lookup by domain name."
+  type        = string
+  default     = ""
+}
+
+variable "route53_domain_name" {
+  description = "The domain name for ACM certificate (e.g., pakalspot.com). Also used to lookup Route53 zone if zone_id is not provided."
+  type        = string
+  default     = "pakalspot.com"
+}
+
+variable "enable_acm_certificate" {
+  description = "Whether to create ACM certificate with DNS validation via Route53. Route53 A records must be created manually."
+  type        = bool
+  default     = false
+}
+
+variable "acm_subject_alternative_names" {
+  description = "List of subject alternative names (SANs) for the ACM certificate (e.g., ['www.pakalspot.com']). Leave empty for just the primary domain."
+  type        = list(string)
+  default     = []
 }

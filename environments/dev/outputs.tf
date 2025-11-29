@@ -34,3 +34,8 @@ output "api_gateway_endpoint" {
   description = "API Gateway base endpoint"
   value       = var.enable_api_gateway ? (length(module.api-gateway) > 0 ? module.api-gateway[0].api_gateway_endpoint : "") : ""
 }
+
+output "acm_pakalspot_cert_arn" {
+  description = "The ARN of the validated ACM certificate for pakalspot.com. Use this ARN in the ALB Ingress annotation alb.ingress.kubernetes.io/certificate-arn"
+  value       = var.enable_acm_certificate && local.route53_zone_id != "" && length(module.acm) > 0 ? module.acm[0].certificate_arn : null
+}

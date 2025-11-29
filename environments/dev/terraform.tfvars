@@ -39,11 +39,17 @@ allocated_storage                        = 20
 max_allocated_storage                    = 100
 backup_retention_period                  = 7
 skip_final_snapshot                      = true
-deletion_protection                      = true
+deletion_protection                      = false
 parameters = [
   {
     name  = "character_set_server"
     value = "utf8mb4"
+    name  = "log_statement"
+    value = "all"  # Options: "none", "ddl", "mod", "all"
+  },
+  {
+    name  = "log_min_duration_statement"
+    value = "0"
   }
 ]
 options = [

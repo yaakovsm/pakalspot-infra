@@ -37,45 +37,45 @@ resource "aws_security_group" "rds" {
 }
 
 module "db" {
-    source = "terraform-aws-modules/rds/aws"
-    
+  source = "terraform-aws-modules/rds/aws"
 
-    identifier = var.db_name
 
-    engine = "postgres"
-    engine_version = "14"
-    family = var.family
-    instance_class = var.instance_class
-    allocated_storage = var.allocated_storage
-    max_allocated_storage = var.max_allocated_storage
-    
-    db_name = var.db_name
-    username = var.db_username
-    port = 5432
+  identifier = var.db_name
 
-    manage_master_user_password_rotation              = true
-    master_user_password_rotate_immediately           = false
-    master_user_password_rotation_schedule_expression = "rate(15 days)"
+  engine                = "postgres"
+  engine_version        = "14"
+  family                = var.family
+  instance_class        = var.instance_class
+  allocated_storage     = var.allocated_storage
+  max_allocated_storage = var.max_allocated_storage
 
-    multi_az = true
-    publicly_accessible = false
-    storage_encrypted = true
-    
-    db_subnet_group_name = var.database_subnet_group_name
-    vpc_security_group_ids = [aws_security_group.rds.id]
-    
-    maintenance_window              = "Mon:00:00-Mon:03:00"
-    backup_window                   = "03:00-06:00"
-    backup_retention_period = var.backup_retention_period
-    skip_final_snapshot = var.skip_final_snapshot    
-    deletion_protection = var.deletion_protection
+  db_name  = var.db_name
+  username = var.db_username
+  port     = 5432
 
-    # Filter out MySQL-specific parameters, keep only PostgreSQL-compatible ones
-    parameters = [
-      for param in var.parameters : param if param.name != "character_set_server"
-    ]
+  manage_master_user_password_rotation              = true
+  master_user_password_rotate_immediately           = false
+  master_user_password_rotation_schedule_expression = "rate(15 days)"
 
-    options = var.options
+  multi_az            = true
+  publicly_accessible = false
+  storage_encrypted   = true
 
-    tags = var.common_tags
+  db_subnet_group_name   = var.database_subnet_group_name
+  vpc_security_group_ids = [aws_security_group.rds.id]
+
+  maintenance_window      = "Mon:00:00-Mon:03:00"
+  backup_window           = "03:00-06:00"
+  backup_retention_period = var.backup_retention_period
+  skip_final_snapshot     = var.skip_final_snapshot
+  deletion_protection     = var.deletion_protection
+
+  # Filter out MySQL-specific parameters, keep only PostgreSQL-compatible ones
+  parameters = [
+    for param in var.parameters : param if param.name != "character_set_server"
+  ]
+
+  options = var.options
+
+  tags = var.common_tags
 }

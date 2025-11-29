@@ -1,0 +1,37 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: pakalspot-backend
+  namespace: pakalspot-dev
+  labels:
+    app.kubernetes.io/name: pakalspot-backend
+    app.kubernetes.io/component: monitoring
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pakalspot-chart
+      app.kubernetes.io/component: backend
+  podMetricsEndpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+      relabelings:
+        - targetLabel: job
+          replacement: pakalspot-backend
+        - sourceLabels:
+            - __meta_kubernetes_pod_label_app_kubernetes_io_name
+          action: replace
+          targetLabel: app
+        - sourceLabels:
+            - __meta_kubernetes_pod_label_app_kubernetes_io_component
+          action: replace
+          targetLabel: component
+        - sourceLabels:
+            - __meta_kubernetes_namespace
+          action: replace
+          targetLabel: namespace
+  namespaceSelector:
+    matchNames:
+      - pakalspot-dev
+

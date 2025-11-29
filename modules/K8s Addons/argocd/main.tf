@@ -23,17 +23,17 @@ resource "null_resource" "argocd_cleanup" {
 }
 
 resource "helm_release" "argocd" {
-  name             = "argo-cd"
-  repository       = "https://argoproj.github.io/argo-helm"
-  chart            = "argo-cd"
-  version          = var.argocd_version
+  name       = "argo-cd"
+  repository = "https://argoproj.github.io/argo-helm"
+  chart      = "argo-cd"
+  version    = var.argocd_version
 
   namespace        = var.argocd_namespace
   create_namespace = true
 
   wait    = var.wait_for_helm
   timeout = var.helm_timeout
-  
+
   values = [
     yamlencode({
       configs = {

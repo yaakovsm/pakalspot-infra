@@ -105,11 +105,49 @@ module "rds" {
 }
 
 module "s3" {
-  source         = "../../modules/s3"
-  s3_bucket_name = var.s3_bucket_name
-  common_tags    = var.common_tags
+  source                   = "../../modules/s3"
+  s3_bucket_name           = var.s3_bucket_name
+  backend_s3_principal_arn = module.eks.node_group_iam_role_arn
+  common_tags              = var.common_tags
 
-  depends_on = [module.networking]
+  depends_on = [module.networking, module.eks]
+}
+
+data "aws_iam_policy_document" "pakalspot_photos_nodegroup" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "s3:PutObject",
+      "s3:DeleteObject",
+      "s3:GetObject",
+    ]
+    resources = [
+      "${module.s3.bucket_arn}/*",
+    ]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "s3:ListBucket",
+    ]
+    resources = [
+      module.s3.bucket_arn,
+    ]
+  }
+}
+
+resource "aws_iam_policy" "pakalspot_photos_nodegroup" {
+  name        = "pakalspot-photos-nodegroup"
+  description = "Allow nodegroup to read/write to pakalspot-photos"
+  policy      = data.aws_iam_policy_document.pakalspot_photos_nodegroup.json
+
+  tags = var.common_tags
+}
+
+resource "aws_iam_role_policy_attachment" "nodegroup_pakalspot_photos" {
+  role       = module.eks.node_group_iam_role_name
+  policy_arn = aws_iam_policy.pakalspot_photos_nodegroup.arn
 }
 
 module "app-backend-irsa" {
@@ -176,4 +214,37 @@ module "api-gateway" {
   common_tags = var.common_tags
 
   depends_on = [module.networking, module.eks]
+}
+
+# Data source to find the Route53 hosted zone for pakalspot.com
+# This is used for ACM certificate DNS validation records only
+# NOTE: Route53 A records pointing to ALB are managed manually, not by Terraform
+data "aws_route53_zone" "pakalspot" {
+  count = var.enable_acm_certificate && var.route53_hosted_zone_id == "" ? 1 : 0
+  name  = var.route53_domain_name
+}
+
+# Use the provided zone ID if available, otherwise use the data source
+# This is only used for ACM certificate validation records
+locals {
+  route53_zone_id = var.enable_acm_certificate ? (
+    var.route53_hosted_zone_id != "" ? var.route53_hosted_zone_id : (
+      length(data.aws_route53_zone.pakalspot) > 0 ? data.aws_route53_zone.pakalspot[0].zone_id : ""
+    )
+  ) : ""
+}
+
+# ACM Certificate Module
+# Creates ACM certificate for pakalspot.com with DNS validation via Route53
+# This only creates DNS validation CNAME records, not the main A record
+# The certificate ARN is output and can be used in the ALB Ingress annotation
+# NOTE: Route53 A records pointing to ALB must be created manually
+module "acm" {
+  count  = var.enable_acm_certificate && local.route53_zone_id != "" ? 1 : 0
+  source = "../../modules/acm"
+
+  domain_name               = var.route53_domain_name
+  hosted_zone_id            = local.route53_zone_id
+  subject_alternative_names = var.acm_subject_alternative_names
+  common_tags               = var.common_tags
 }

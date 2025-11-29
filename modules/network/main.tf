@@ -4,15 +4,15 @@ module "vpc" {
   name = var.vpc_name
   cidr = var.vpc_cidr
 
-  azs             = var.availability_zones
-  private_subnets = var.private_subnets
-  public_subnets  = var.public_subnets
+  azs              = var.availability_zones
+  private_subnets  = var.private_subnets
+  public_subnets   = var.public_subnets
   database_subnets = var.database_subnets
 
-  create_database_subnet_group = true
+  create_database_subnet_group       = true
   create_database_subnet_route_table = true
 
-  enable_nat_gateway = var.enable_nat_gateway
+  enable_nat_gateway      = var.enable_nat_gateway
   map_public_ip_on_launch = true
 
   public_subnet_tags = merge(

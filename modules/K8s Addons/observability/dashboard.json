@@ -225,7 +225,7 @@
       "pluginVersion": "10.0.0",
       "targets": [
         {
-          "expr": "sum(rate(http_requests_total{job=\"pakalspot-backend\"}[5m]))",
+          "expr": "sum(rate(http_request_duration_seconds_count{job=\"pakalspot-backend\"}[5m]))",
           "refId": "A"
         }
       ],
@@ -322,7 +322,7 @@
       "pluginVersion": "10.0.0",
       "targets": [
         {
-          "expr": "sum(rate(http_requests_total{job=\"pakalspot-backend\",status!~\"2..\"}[5m]))",
+          "expr": "sum(rate(http_request_duration_seconds_count{job=\"pakalspot-backend\",status_code!~\"2..\"}[5m]))",
           "refId": "A"
         }
       ],

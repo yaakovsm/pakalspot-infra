@@ -1,9 +1,9 @@
 
 resource "helm_release" "prometheus_stack" {
-  name             = "kube-prometheus-stack"
-  repository       = "https://prometheus-community.github.io/helm-charts"
-  chart            = "kube-prometheus-stack"
-  version          = "79.1.0"
+  name       = "kube-prometheus-stack"
+  repository = "https://prometheus-community.github.io/helm-charts"
+  chart      = "kube-prometheus-stack"
+  version    = "79.1.0"
 
   namespace        = "monitoring"
   create_namespace = true
@@ -54,7 +54,7 @@ resource "kubectl_manifest" "monitoring_secretstore" {
                 namespace: external-secrets
   YAML
 
-  depends_on = [helm_release.prometheus_stack]
+  depends_on        = [helm_release.prometheus_stack]
   wait              = var.wait_for_kubectl
   server_side_apply = false
 }
@@ -82,7 +82,7 @@ resource "kubectl_manifest" "gmail_secret" {
           property: password
   YAML
 
-  depends_on = [kubectl_manifest.monitoring_secretstore]
+  depends_on        = [kubectl_manifest.monitoring_secretstore]
   wait              = var.wait_for_kubectl
   server_side_apply = false
 }
@@ -90,11 +90,11 @@ resource "kubectl_manifest" "gmail_secret" {
 # PrometheusRule
 resource "kubectl_manifest" "alert_rules" {
   yaml_body = file("${path.module}/alert-rules.yaml")
-  
+
   depends_on = [
-    helm_release.prometheus_stack  # Only needs Helm release - CRDs come from it
+    helm_release.prometheus_stack # Only needs Helm release - CRDs come from it
   ]
-  
+
   wait              = var.wait_for_kubectl
   server_side_apply = false
 }
@@ -102,13 +102,13 @@ resource "kubectl_manifest" "alert_rules" {
 # AlertmanagerConfig
 resource "kubectl_manifest" "alertmanager_config" {
   yaml_body = file("${path.module}/alertmanager-config.yaml")
-  
+
   depends_on = [
     helm_release.prometheus_stack,
     kubectl_manifest.gmail_secret,
     kubectl_manifest.alert_rules
   ]
-  
+
   wait              = var.wait_for_kubectl
   server_side_apply = false
 }
@@ -119,11 +119,11 @@ resource "kubernetes_config_map" "grafana_dashboard" {
   metadata {
     name      = "pakalspot-dashboard"
     namespace = "monitoring"
-    
+
     labels = {
       grafana_dashboard = "1"
     }
-    
+
     annotations = {
       grafana_folder = "pakalspot"
     }
@@ -134,4 +134,15 @@ resource "kubernetes_config_map" "grafana_dashboard" {
   }
 
   depends_on = [helm_release.prometheus_stack]
+}
+
+resource "kubectl_manifest" "podmonitor_backend" {
+  yaml_body = file("${path.module}/podmonitor-backend.yaml")
+
+  depends_on = [
+    helm_release.prometheus_stack
+  ]
+
+  wait              = var.wait_for_kubectl
+  server_side_apply = false
 }
