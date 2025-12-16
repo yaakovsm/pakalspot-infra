@@ -43,25 +43,30 @@ module "s3_bucket" {
 }
 
 data "aws_iam_policy_document" "pakalspot_photos_bucket" {
-  statement {
-    sid = "AllowBackendRW"
+  # Allow backend read/write access (if backend_s3_principal_arn is provided)
+  dynamic "statement" {
+    for_each = var.backend_s3_principal_arn != null ? [1] : []
+    content {
+      sid = "AllowBackendRW"
 
-    principals {
-      type        = "AWS"
-      identifiers = [var.backend_s3_principal_arn]
+      principals {
+        type        = "AWS"
+        identifiers = [var.backend_s3_principal_arn]
+      }
+
+      actions = [
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:DeleteObject",
+      ]
+
+      resources = [
+        "${module.s3_bucket.s3_bucket_arn}/*",
+      ]
     }
-
-    actions = [
-      "s3:GetObject",
-      "s3:PutObject",
-      "s3:DeleteObject",
-    ]
-
-    resources = [
-      "${module.s3_bucket.s3_bucket_arn}/*",
-    ]
   }
 
+  # Allow public read-only access over HTTPS
   statement {
     sid = "AllowPublicReadOnlyOverTLS"
 
@@ -88,6 +93,7 @@ data "aws_iam_policy_document" "pakalspot_photos_bucket" {
 }
 
 resource "aws_s3_bucket_policy" "pakalspot_photos_bucket" {
+  count  = var.create_bucket_policy ? 1 : 0
   bucket = module.s3_bucket.s3_bucket_id
   policy = data.aws_iam_policy_document.pakalspot_photos_bucket.json
 }

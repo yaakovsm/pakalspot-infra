@@ -42,87 +42,6 @@ variable "common_tags" {
   default     = {}
 }
 
-# EKS variables
-variable "cluster_name" {
-  description = "The name of the cluster"
-  type        = string
-  default     = "pakalspot-cluster"
-}
-variable "kubernetes_version" {
-  description = "The version of the Kubernetes cluster"
-  type        = string
-  default     = "1.29"
-}
-variable "enable_irsa" {
-  description = "Enable IRSA"
-  type        = bool
-  default     = true
-}
-variable "endpoint_public_access" {
-  description = "Enable public access to the endpoint"
-  type        = bool
-  default     = true
-}
-variable "enable_cluster_creator_admin_permissions" {
-  description = "Enable cluster creator admin permissions"
-  type        = bool
-  default     = true
-}
-
-#node group variables
-variable "node_group_name" {
-  description = "The name of the node group"
-  type        = string
-  default     = "pakalspot-node-group"
-}
-variable "ami_type" {
-  description = "The type of the AMI"
-  type        = string
-  default     = "AL2_x86_64"
-}
-variable "instance_types" {
-  description = "The instance types"
-  type        = list(string)
-  default     = ["t3.small"]
-}
-variable "min_size" {
-  description = "The minimum size of the node group"
-  type        = number
-  default     = 2
-}
-variable "max_size" {
-  description = "The maximum size of the node group"
-  type        = number
-  default     = 4
-}
-variable "desired_size" {
-  description = "The desired size of the node group"
-  type        = number
-  default     = 2
-}
-variable "capacity_type" {
-  description = "Type of capacity associated with the EKS Node Group. Valid values: ON_DEMAND, SPOT"
-  type        = string
-  default     = "ON_DEMAND"
-}
-variable "disk_size" {
-  description = "Disk size in GiB for worker nodes"
-  type        = number
-  default     = 20
-}
-
-# External Secrets Operator variables
-variable "external_secrets_version" {
-  description = "The version of the External Secrets Operator"
-  type        = string
-  default     = "v0.9.20"
-}
-variable "external_secrets_namespace" {
-  description = "The namespace of the External Secrets Operator"
-  type        = string
-  default     = "external-secrets"
-}
-
 # RDS variables
 variable "db_name" {
   description = "The name of the database"
@@ -142,17 +61,13 @@ variable "db_username" {
 variable "db_password" {
   description = "The password of the database"
   type        = string
-  default     = "pakalspot"
+  sensitive   = true
+  default     = null
 }
 variable "db_port" {
   description = "The port of the database"
   type        = number
   default     = 5432
-}
-variable "db_host" {
-  description = "The host of the database"
-  type        = string
-  default     = "localhost"
 }
 variable "db_engine" {
   description = "The engine of the database"
@@ -184,6 +99,11 @@ variable "backup_retention_period" {
   type        = number
   default     = 7
 }
+variable "multi_az" {
+  description = "Enable Multi-AZ deployment for RDS (default: false for dev)"
+  type        = bool
+  default     = false
+}
 variable "parameters" {
   description = "The parameters of the database"
   type = list(object({
@@ -213,101 +133,95 @@ variable "deletion_protection" {
   type        = bool
   default     = true
 }
+
 # S3 variables
-variable "s3_bucket_name" {
-  description = "The name of the S3 bucket"
+variable "frontend_s3_bucket_name" {
+  description = "The name of the S3 bucket for frontend static site"
+  type        = string
+}
+variable "photos_s3_bucket_name" {
+  description = "The name of the S3 bucket for photos"
   type        = string
   default     = "pakalspot-photos-dev"
 }
-variable "backend_s3_principal_arn" {
-  description = "IAM ARN (user/role) that can read/write to pakalspot-photos"
+
+# App Runner variables
+variable "app_runner_port" {
+  description = "Port on which the application listens"
+  type        = number
+  default     = 8000
+}
+variable "ecr_repository_url" {
+  description = "ECR repository URL"
   type        = string
 }
-# ArgoCD variables
-variable "argocd_version" {
-  description = "The version of the ArgoCD Helm chart"
+variable "app_runner_service_name" {
+  description = "Name of the App Runner service"
   type        = string
-  default     = "2.11.0"
+  default     = "pakalspot-backend"
 }
-variable "argocd_namespace" {
-  description = "The namespace of the ArgoCD"
+variable "app_runner_cpu" {
+  description = "CPU allocation for App Runner service (e.g., '0.25 vCPU', '0.5 vCPU', '1 vCPU')"
   type        = string
-  default     = "argocd"
+  default     = "0.25 vCPU"
 }
-variable "argocd_insecure" {
-  description = "The insecure mode of the ArgoCD"
-  type        = bool
-  default     = true
-}
-variable "argocd_service_type" {
-  description = "The service type of the ArgoCD"
+variable "app_runner_memory" {
+  description = "Memory allocation for App Runner service (e.g., '0.5 GB', '1 GB', '2 GB')"
   type        = string
-  default     = "LoadBalancer"
+  default     = "0.5 GB"
 }
-variable "argocd_controller_replicas" {
-  description = "The number of controller replicas of the ArgoCD"
+variable "app_runner_min_instances" {
+  description = "Minimum number of instances for App Runner auto-scaling"
   type        = number
   default     = 1
 }
-# API Gateway variables
-variable "enable_api_gateway" {
-  description = "Enable API Gateway (requires NLB to exist first)"
-  type        = bool
-  default     = false
-}
-variable "api_gateway_nlb_name" {
-  description = "Name of the NLB created by backend service (e.g., k8s-pakalspot-dev-backend-xxxxx)"
-  type        = string
-  default     = ""
-}
-
-variable "wait_for_helm_releases" {
-  description = "Whether to wait for Helm releases to be ready (set to false for faster dev deployments)"
-  type        = bool
-  default     = false
-}
-
-variable "helm_timeout" {
-  description = "Timeout in seconds for Helm releases (reduced for dev)"
+variable "app_runner_max_instances" {
+  description = "Maximum number of instances for App Runner auto-scaling"
   type        = number
-  default     = 300
+  default     = 5
 }
 
-variable "wait_for_kubectl_manifests" {
-  description = "Whether to wait for kubectl manifests to be ready (set to false for faster dev deployments)"
-  type        = bool
-  default     = false
-}
 
-variable "cluster_wait_duration" {
-  description = "Duration to wait for EKS cluster to be ready before deploying Helm releases (reduced for dev)"
+
+# CloudFront variables
+variable "cloudfront_price_class" {
+  description = "Price class for CloudFront distribution (PriceClass_All, PriceClass_200, PriceClass_100)"
   type        = string
-  default     = "10s"
+  default     = "PriceClass_100"
+}
+variable "cloudfront_comment" {
+  description = "Comment for CloudFront distribution"
+  type        = string
+  default     = "PakalSpot Frontend Distribution"
 }
 
-# Route 53 variables
-# NOTE: Route53 A records pointing to ALB are managed manually, not by Terraform
-# These variables are only used for ACM certificate DNS validation records
+# Route53 and ACM variables
 variable "route53_hosted_zone_id" {
-  description = "The Route 53 hosted zone ID for pakalspot.com. Required for ACM certificate DNS validation. Leave empty to auto-lookup by domain name."
+  description = "Route53 hosted zone ID for pakalspot.com"
   type        = string
-  default     = ""
+  default     = "Z0034741Q8NP4KS4CM1B"
 }
 
 variable "route53_domain_name" {
-  description = "The domain name for ACM certificate (e.g., pakalspot.com). Also used to lookup Route53 zone if zone_id is not provided."
+  description = "Domain name for Route53 record (e.g., pakalspot.com)"
   type        = string
   default     = "pakalspot.com"
 }
 
-variable "enable_acm_certificate" {
-  description = "Whether to create ACM certificate with DNS validation via Route53. Route53 A records must be created manually."
-  type        = bool
-  default     = false
+variable "acm_certificate_arn" {
+  description = "ARN of existing ACM certificate for pakalspot.com (must be in us-east-1 for CloudFront)"
+  type        = string
+  default     = "arn:aws:acm:us-east-1:182399725157:certificate/20ec8b78-356a-4150-a932-82253340f753"
 }
 
-variable "acm_subject_alternative_names" {
-  description = "List of subject alternative names (SANs) for the ACM certificate (e.g., ['www.pakalspot.com']). Leave empty for just the primary domain."
+variable "enable_route53_record" {
+  description = "Enable Route53 record update to point to CloudFront"
+  type        = bool
+  default     = true
+}
+
+variable "cloudfront_aliases" {
+  description = "List of custom domain aliases for CloudFront (e.g., [\"pakalspot.com\"])"
   type        = list(string)
-  default     = []
+  default     = ["pakalspot.com"]
 }

@@ -11,6 +11,12 @@ variable "cors_allowed_origins" {
 variable "backend_s3_principal_arn" {
   type        = string
   description = "IAM ARN (user/role) that can read/write to pakalspot-photos"
+  default     = null
+}
+variable "create_bucket_policy" {
+  type        = bool
+  description = "Whether to create bucket policy (set to false if IAM policies handle access)"
+  default     = true
 }
 
 variable "common_tags" {

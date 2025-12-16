@@ -1,23 +1,18 @@
-# Security group for RDS allowing access from EKS nodes/pods
+# Security group for RDS allowing access from allowed security groups
 resource "aws_security_group" "rds" {
   name        = "${var.db_name}-sg"
   description = "Security group for RDS PostgreSQL database"
   vpc_id      = var.vpc_id
 
-  ingress {
-    description     = "PostgreSQL from EKS cluster"
-    from_port       = 5432
-    to_port         = 5432
-    protocol        = "tcp"
-    security_groups = [var.eks_security_group_id]
-  }
-
-  ingress {
-    description     = "PostgreSQL from EKS node group (pod traffic)"
-    from_port       = 5432
-    to_port         = 5432
-    protocol        = "tcp"
-    security_groups = [var.eks_node_security_group_id]
+  dynamic "ingress" {
+    for_each = var.allowed_security_group_ids
+    content {
+      description     = "PostgreSQL from security group ${ingress.key + 1}"
+      from_port       = 5432
+      to_port         = 5432
+      protocol        = "tcp"
+      security_groups = [ingress.value]
+    }
   }
 
   egress {
@@ -57,7 +52,7 @@ module "db" {
   master_user_password_rotate_immediately           = false
   master_user_password_rotation_schedule_expression = "rate(15 days)"
 
-  multi_az            = true
+  multi_az            = var.multi_az
   publicly_accessible = false
   storage_encrypted   = true
 

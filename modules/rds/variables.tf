@@ -69,14 +69,17 @@ variable "database_subnet_group_name" {
   description = "Database subnet group name"
   type        = string
 }
-variable "eks_security_group_id" {
-  description = "EKS cluster security group ID to allow database access"
-  type        = string
+variable "allowed_security_group_ids" {
+  description = "List of security group IDs allowed to access the database"
+  type        = list(string)
+  default     = []
 }
-variable "eks_node_security_group_id" {
-  description = "EKS node group security group ID to allow database access from pods"
-  type        = string
+variable "multi_az" {
+  description = "Enable Multi-AZ deployment for RDS"
+  type        = bool
+  default     = true
 }
+
 variable "common_tags" {
   description = "Common tags"
   type        = map(string)

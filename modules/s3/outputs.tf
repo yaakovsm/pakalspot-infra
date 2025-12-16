@@ -13,3 +13,8 @@ output "bucket_name" {
   value       = module.s3_bucket.s3_bucket_id
 }
 
+output "bucket_regional_domain_name" {
+  description = "Regional domain name of the bucket (for CloudFront origin)"
+  value       = module.s3_bucket.s3_bucket_bucket_regional_domain_name
+}
+

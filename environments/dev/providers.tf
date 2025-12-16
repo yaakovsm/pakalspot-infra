@@ -5,21 +5,6 @@ terraform {
       version = "~> 6.22"
     }
 
-    kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = "2.38.0"
-    }
-
-    helm = {
-      source  = "hashicorp/helm"
-      version = "~> 2.13"
-    }
-
-    kubectl = {
-      source  = "gavinbunney/kubectl"
-      version = "~> 1.14"
-    }
-
     time = {
       source  = "hashicorp/time"
       version = "~> 0.11"
@@ -30,63 +15,4 @@ terraform {
 provider "aws" {
   profile = var.aws_profile
   region  = var.aws_region
-}
-
-provider "kubernetes" {
-  host                   = module.eks.cluster_endpoint
-  cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
-
-  exec {
-    api_version = "client.authentication.k8s.io/v1beta1"
-    command     = "aws"
-    args = [
-      "eks", "get-token",
-      "--cluster-name", var.cluster_name,
-      "--region", var.aws_region
-    ]
-
-    env = {
-      AWS_PROFILE = var.aws_profile
-    }
-  }
-}
-
-provider "helm" {
-  kubernetes {
-    host                   = module.eks.cluster_endpoint
-    cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
-
-    exec {
-      api_version = "client.authentication.k8s.io/v1beta1"
-      command     = "aws"
-      args = [
-        "eks", "get-token",
-        "--cluster-name", var.cluster_name,
-        "--region", var.aws_region
-      ]
-
-      env = {
-        AWS_PROFILE = var.aws_profile
-      }
-    }
-  }
-}
-
-provider "kubectl" {
-  host                   = module.eks.cluster_endpoint
-  cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
-
-  exec {
-    api_version = "client.authentication.k8s.io/v1beta1"
-    command     = "aws"
-    args = [
-      "eks", "get-token",
-      "--cluster-name", var.cluster_name,
-      "--region", var.aws_region
-    ]
-
-    env = {
-      AWS_PROFILE = var.aws_profile
-    }
-  }
 }
