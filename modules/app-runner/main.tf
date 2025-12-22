@@ -194,19 +194,24 @@ resource "aws_apprunner_service" "backend" {
       image_configuration {
         port = tostring(var.app_runner_port)
         runtime_environment_variables = {
-          DB_HOST = var.db_host
-          DB_NAME = var.db_name
-          DB_USER = var.db_user
-          DB_PORT = "5432"
+          DB_HOST            = var.db_host
+          DB_NAME            = var.db_name
+          DB_USER            = var.db_user
+          DB_PORT            = "5432"
+          INIT_SEED_BUCKET   = "pakalspot-init-photos"
+          INIT_SEED_JSON_KEY = "init_spots.json"
+          SEED_ENABLED       = "true"
         }
         runtime_environment_secrets = {
-          DB_PASSWORD = "${var.rds_master_secret_arn}:password::"
-          JWT_SECRET    = "${var.secrets_manager_secret_arn}:JWT_SECRET::"
-          S3_BUCKET     = "${var.secrets_manager_secret_arn}:S3_BUCKET::"
-          AWS_REGION    = "${var.secrets_manager_secret_arn}:AWS_REGION::"
-          SECRET_KEY    = "${var.secrets_manager_secret_arn}:SECRET_KEY::"
-          S3_ACCESS_KEY = "${var.secrets_manager_secret_arn}:S3_ACCESS_KEY::"
-          S3_SECRET_KEY = "${var.secrets_manager_secret_arn}:S3_SECRET_KEY::"
+          DB_PASSWORD          = "${var.rds_master_secret_arn}:password::"
+          JWT_SECRET           = "${var.secrets_manager_secret_arn}:JWT_SECRET::"
+          S3_BUCKET            = "${var.secrets_manager_secret_arn}:S3_BUCKET::"
+          AWS_REGION           = "${var.secrets_manager_secret_arn}:AWS_REGION::"
+          SECRET_KEY           = "${var.secrets_manager_secret_arn}:SECRET_KEY::"
+          S3_ACCESS_KEY        = "${var.secrets_manager_secret_arn}:S3_ACCESS_KEY::"
+          S3_SECRET_KEY        = "${var.secrets_manager_secret_arn}:S3_SECRET_KEY::"
+          INIT_PHOTOS_BASE_URL = "${var.secrets_manager_secret_arn}:INIT_PHOTOS_BASE_URL::"
+          ADMIN_SEED_API_KEY   = "${var.secrets_manager_secret_arn}:ADMIN_SEED_API_KEY::"
         }
       }
     }

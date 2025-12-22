@@ -225,3 +225,9 @@ variable "cloudfront_aliases" {
   type        = list(string)
   default     = ["pakalspot.com"]
 }
+
+variable "cloudfront_domain" {
+  description = "CloudFront distribution domain name (for seed invoker module)"
+  type        = string
+  default     = "d1356pm1pxuqc3.cloudfront.net"
+}

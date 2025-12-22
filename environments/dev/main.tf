@@ -71,6 +71,10 @@ module "s3_photos" {
   create_bucket_policy     = true # Keep public read policy
   common_tags              = var.common_tags
 }
+data "aws_s3_bucket" "init_photos" {
+  bucket = "pakalspot-init-photos"
+}
+
 # ============================================================================
 # RDS PostgreSQL Database
 # ============================================================================
@@ -159,6 +163,12 @@ module "cloudfront_frontend" {
   s3_bucket_arn                  = module.s3_frontend.bucket_arn
   s3_bucket_regional_domain_name = module.s3_frontend.bucket_regional_domain_name
 
+  init_photos_bucket_name                 = data.aws_s3_bucket.init_photos.bucket
+  init_photos_bucket_id                   = data.aws_s3_bucket.init_photos.id
+  init_photos_bucket_arn                  = data.aws_s3_bucket.init_photos.arn
+  init_photos_bucket_regional_domain_name = data.aws_s3_bucket.init_photos.bucket_regional_domain_name
+
+
   cloudfront_comment     = var.cloudfront_comment
   cloudfront_price_class = var.cloudfront_price_class
   default_root_object    = "index.html"
@@ -171,9 +181,13 @@ module "cloudfront_frontend" {
   aliases             = length(var.cloudfront_aliases) > 0 ? var.cloudfront_aliases : []
   acm_certificate_arn = var.acm_certificate_arn != "" ? var.acm_certificate_arn : null
 
+  # API proxy configuration
+  app_runner_service_url = module.app_runner.service_url
+  enable_api_proxy       = true
+
   common_tags = var.common_tags
 
-  depends_on = [module.s3_frontend]
+  depends_on = [module.s3_frontend, module.app_runner]
 }
 
 # ============================================================================
@@ -183,13 +197,31 @@ module "cloudfront_frontend" {
 module "route53_cloudfront" {
   source = "../../modules/route53-cloudfront"
 
-  hosted_zone_id                    = var.route53_hosted_zone_id
-  domain_name                       = var.route53_domain_name
-  cloudfront_distribution_domain_name = module.cloudfront_frontend.distribution_domain_name
+  hosted_zone_id                         = var.route53_hosted_zone_id
+  domain_name                            = var.route53_domain_name
+  cloudfront_distribution_domain_name    = module.cloudfront_frontend.distribution_domain_name
   cloudfront_distribution_hosted_zone_id = "Z2FDTNDATAQYW2"
-  enable_route53_record             = var.enable_route53_record
+  enable_route53_record                  = var.enable_route53_record
 
   common_tags = var.common_tags
 
   depends_on = [module.cloudfront_frontend]
+}
+
+# ============================================================================
+# Seed Invoker Lambda
+# ============================================================================
+# Lambda function that performs one-time seeding of the backend via CloudFront
+module "seed_invoker" {
+  source = "../../modules/seed-invoker"
+
+  cloudfront_domain = var.cloudfront_domain
+  backend_base_url  = module.app_runner.service_url
+  aws_region        = var.aws_region
+  common_tags       = var.common_tags
+
+  depends_on = [
+    module.cloudfront_frontend,
+    module.app_runner
+  ]
 }

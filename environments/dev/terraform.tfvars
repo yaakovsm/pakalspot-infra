@@ -49,7 +49,7 @@ photos_s3_bucket_name   = "pakalspot-photos"
 # App Runner Configuration
 # ECR Image URI format: <account-id>.dkr.ecr.<region>.amazonaws.com/<repository>:<tag>
 # Note: Must include the tag (e.g., :latest, :dev-bfb77c1, etc.)
-ecr_repository_url       = "182399725157.dkr.ecr.us-east-1.amazonaws.com/pakalspot-backend:dev-363db3f"
+ecr_repository_url       = "182399725157.dkr.ecr.us-east-1.amazonaws.com/pakalspot-backend:latest"
 app_runner_service_name  = "pakalspot-backend"
 app_runner_cpu           = "0.25 vCPU"
 app_runner_memory        = "0.5 GB"
