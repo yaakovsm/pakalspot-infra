@@ -1,0 +1,106 @@
+{
+  "acm_certificate_arn": {
+    "sensitive": false,
+    "type": "string",
+    "value": "arn:aws:acm:us-east-1:182399725157:certificate/20ec8b78-356a-4150-a932-82253340f753"
+  },
+  "app_runner_iam_role_arn": {
+    "sensitive": false,
+    "type": "string",
+    "value": "arn:aws:iam::182399725157:role/pakalspot-backend-role"
+  },
+  "app_runner_service_arn": {
+    "sensitive": false,
+    "type": "string",
+    "value": "arn:aws:apprunner:us-east-1:182399725157:service/pakalspot-backend/e3544c923ce442a6ac05020dfbdb2ceb"
+  },
+  "app_runner_service_id": {
+    "sensitive": false,
+    "type": "string",
+    "value": "arn:aws:apprunner:us-east-1:182399725157:service/pakalspot-backend/e3544c923ce442a6ac05020dfbdb2ceb"
+  },
+  "app_runner_service_url": {
+    "sensitive": false,
+    "type": "string",
+    "value": "sjizgyvt8n.us-east-1.awsapprunner.com"
+  },
+  "cloudfront_distribution_domain_name": {
+    "sensitive": false,
+    "type": "string",
+    "value": "d1356pm1pxuqc3.cloudfront.net"
+  },
+  "cloudfront_distribution_id": {
+    "sensitive": false,
+    "type": "string",
+    "value": "E2E2OIHHR9AA7X"
+  },
+  "cloudfront_distribution_url": {
+    "sensitive": false,
+    "type": "string",
+    "value": "https://d1356pm1pxuqc3.cloudfront.net"
+  },
+  "database_url_secret_arn": {
+    "sensitive": false,
+    "type": "string",
+    "value": "arn:aws:secretsmanager:us-east-1:182399725157:secret:/pakalspot/backend-S1WBUx"
+  },
+  "db_instance_endpoint": {
+    "sensitive": false,
+    "type": "string",
+    "value": "pakalspotdb.ckho4oo4ocby.us-east-1.rds.amazonaws.com:5432"
+  },
+  "db_instance_id": {
+    "sensitive": false,
+    "type": "string",
+    "value": "pakalspotdb"
+  },
+  "frontend_s3_bucket_arn": {
+    "sensitive": false,
+    "type": "string",
+    "value": "arn:aws:s3:::pakalspot-web-dev"
+  },
+  "frontend_s3_bucket_name": {
+    "sensitive": false,
+    "type": "string",
+    "value": "pakalspot-web-dev"
+  },
+  "photos_s3_bucket_arn": {
+    "sensitive": false,
+    "type": "string",
+    "value": "arn:aws:s3:::pakalspot-photos"
+  },
+  "photos_s3_bucket_name": {
+    "sensitive": false,
+    "type": "string",
+    "value": "pakalspot-photos"
+  },
+  "private_subnets": {
+    "sensitive": false,
+    "type": [
+      "tuple",
+      [
+        "string",
+        "string"
+      ]
+    ],
+    "value": [
+      "subnet-090ec5b4c920fdacd",
+      "subnet-00ccb4e7542c124ef"
+    ]
+  },
+  "rds_endpoint": {
+    "sensitive": false,
+    "type": "string",
+    "value": "pakalspotdb.ckho4oo4ocby.us-east-1.rds.amazonaws.com:5432"
+  },
+  "route53_record_fqdn": {
+    "sensitive": false,
+    "type": "string",
+    "value": "pakalspot.com"
+  },
+  "vpc_id": {
+    "sensitive": false,
+    "type": "string",
+    "value": "vpc-057877662d17c30ac"
+  }
+}

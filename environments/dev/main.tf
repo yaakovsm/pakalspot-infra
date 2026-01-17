@@ -112,6 +112,11 @@ data "aws_secretsmanager_secret" "app_config" {
   name = "/pakalspot/backend"
 }
 
+# Read current secret value to merge with INIT_PHOTOS_BASE_URL
+data "aws_secretsmanager_secret_version" "app_config_current" {
+  secret_id = data.aws_secretsmanager_secret.app_config.id
+}
+
 # ============================================================================
 # App Runner Service
 # ============================================================================
@@ -204,6 +209,26 @@ module "route53_cloudfront" {
   enable_route53_record                  = var.enable_route53_record
 
   common_tags = var.common_tags
+
+  depends_on = [module.cloudfront_frontend]
+}
+
+# ============================================================================
+# Update Secrets Manager with INIT_PHOTOS_BASE_URL
+# ============================================================================
+# Automatically update the secret with CloudFront distribution URL for photos
+# This merges INIT_PHOTOS_BASE_URL with existing secret values
+resource "aws_secretsmanager_secret_version" "app_config" {
+  secret_id = data.aws_secretsmanager_secret.app_config.id
+
+  secret_string = jsonencode(
+    merge(
+      jsondecode(data.aws_secretsmanager_secret_version.app_config_current.secret_string),
+      {
+        INIT_PHOTOS_BASE_URL = "https://${module.cloudfront_frontend.distribution_domain_name}"
+      }
+    )
+  )
 
   depends_on = [module.cloudfront_frontend]
 }
