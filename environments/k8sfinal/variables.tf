@@ -311,3 +311,9 @@ variable "acm_subject_alternative_names" {
   type        = list(string)
   default     = []
 }
+
+variable "existing_acm_certificate_arn" {
+  description = "ARN of existing ACM certificate to use. If provided, Terraform will reference it via data source instead of creating a new one. Leave empty to create new certificate."
+  type        = string
+  default     = ""
+}

@@ -36,6 +36,16 @@ output "api_gateway_endpoint" {
 }
 
 output "acm_pakalspot_cert_arn" {
-  description = "The ARN of the validated ACM certificate for pakalspot.com. Use this ARN in the ALB Ingress annotation alb.ingress.kubernetes.io/certificate-arn"
-  value       = var.enable_acm_certificate && local.route53_zone_id != "" && length(module.acm) > 0 ? module.acm[0].certificate_arn : null
+  description = "The ARN of the ACM certificate (existing or newly created). Use this ARN in the ALB Ingress annotation alb.ingress.kubernetes.io/certificate-arn"
+  value       = var.enable_acm_certificate ? local.acm_certificate_arn : null
+}
+
+output "route53_record_fqdn" {
+  description = "The FQDN of the Route53 record pointing to ALB"
+  value       = var.enable_acm_certificate && local.route53_zone_id != "" && length(module.route53) > 0 ? module.route53[0].route53_record_fqdn : null
+}
+
+output "alb_dns_name" {
+  description = "The DNS name of the ALB (for reference)"
+  value       = var.enable_acm_certificate && local.route53_zone_id != "" && length(module.route53) > 0 ? module.route53[0].alb_dns_name : null
 }

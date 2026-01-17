@@ -234,17 +234,54 @@ locals {
   ) : ""
 }
 
-# ACM Certificate Module
+# Data source to reference existing ACM certificate (if provided)
+data "aws_acm_certificate" "existing" {
+  count = var.enable_acm_certificate && var.existing_acm_certificate_arn != "" ? 1 : 0
+  arn   = var.existing_acm_certificate_arn
+}
+
+# ACM Certificate Module (only if not using existing certificate)
 # Creates ACM certificate for pakalspot.com with DNS validation via Route53
 # This only creates DNS validation CNAME records, not the main A record
-# The certificate ARN is output and can be used in the ALB Ingress annotation
 # NOTE: Route53 A records pointing to ALB must be created manually
 module "acm" {
-  count  = var.enable_acm_certificate && local.route53_zone_id != "" ? 1 : 0
+  count  = var.enable_acm_certificate && var.existing_acm_certificate_arn == "" && local.route53_zone_id != "" ? 1 : 0
   source = "../../modules/acm"
 
   domain_name               = var.route53_domain_name
   hosted_zone_id            = local.route53_zone_id
   subject_alternative_names = var.acm_subject_alternative_names
   common_tags               = var.common_tags
+}
+
+# Local to get certificate ARN (either from existing or newly created)
+locals {
+  acm_certificate_arn = var.enable_acm_certificate ? (
+    var.existing_acm_certificate_arn != "" ? var.existing_acm_certificate_arn : (
+      length(module.acm) > 0 ? module.acm[0].certificate_arn : ""
+    )
+  ) : ""
+}
+
+# Route53 Module
+# Automatically creates A record pointing to ALB
+# This replaces manual Route53 record creation
+module "route53" {
+  count  = var.enable_acm_certificate && local.route53_zone_id != "" ? 1 : 0
+  source = "../../modules/route53"
+
+  hosted_zone_id        = local.route53_zone_id
+  domain_name          = var.route53_domain_name
+  cluster_name         = var.cluster_name
+  enable_route53_record = true
+  # alb_name and alb_arn are optional - module will auto-detect ALB by cluster tags
+  # The module will find ALB created by Kubernetes ingress with tag: elbv2.k8s.aws/cluster
+  common_tags          = var.common_tags
+
+  depends_on = [
+    module.eks,
+    module.aws-load-balancer-controller
+    # Note: ALB will be created by Kubernetes ingress after deployment
+    # Route53 record will be created once ALB exists (may require second terraform apply)
+  ]
 }
