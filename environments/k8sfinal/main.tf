@@ -155,7 +155,7 @@ module "app-backend-irsa" {
   oidc_provider_arn = module.eks.oidc_provider_arn
   s3_bucket_arn     = module.s3.bucket_arn
 
-  namespace            = "pakalspot-dev"
+  namespace            = "pakalspot-k8sfinal"
   service_account_name = "pakalspot-backend"
 
   common_tags = var.common_tags
@@ -210,7 +210,7 @@ module "api-gateway" {
   vpc_id     = module.networking.vpc_id
   subnet_ids = module.networking.private_subnets
 
-  stage_name  = "dev"
+  stage_name  = "k8sfinal"
   common_tags = var.common_tags
 
   depends_on = [module.networking, module.eks]
