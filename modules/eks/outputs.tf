@@ -26,3 +26,9 @@ output "node_group_iam_role_name" {
   description = "IAM role name for the EKS node group"
   value       = module.eks.eks_managed_node_groups[var.node_group_name].iam_role_name
 }
+
+output "node_group_name" {
+  description = "The actual AWS nodegroup name (with random suffix appended by EKS module)"
+  # node_group_id format is "cluster_name:node_group_name", so we split and take the second part
+  value       = split(":", module.eks.eks_managed_node_groups[var.node_group_name].node_group_id)[1]
+}

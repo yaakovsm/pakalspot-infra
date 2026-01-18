@@ -61,17 +61,21 @@ data "aws_lb" "alb_by_arn_from_tags" {
 }
 
 # Route 53 record pointing to ALB
-# Only create if ALB exists (data source found it)
-# Note: aws_route53_record doesn't support tags directly
+# Note: This resource requires ALB to exist
+# Use static for_each key to allow planning, but apply will fail if ALB doesn't exist (expected)
+# Solution: Apply in stages - first create infrastructure + deploy app (creates ALB), then apply again
 resource "aws_route53_record" "main" {
-  count   = var.enable_route53_record && local.has_alb_data ? 1 : 0
-  zone_id = var.hosted_zone_id
-  name    = var.domain_name
-  type    = "A"
+  for_each = var.enable_route53_record ? { "main" = true } : {}
+  zone_id  = var.hosted_zone_id
+  name     = var.domain_name
+  type     = "A"
 
+  # Alias block is required for A records pointing to ALB
+  # Use try() to handle missing ALB data gracefully - will fail during apply if ALB doesn't exist
+  # This is expected behavior - user should create ALB first, then apply Route53
   alias {
-    name                   = local.alb_data.dns_name
-    zone_id                = local.alb_data.zone_id
+    name                   = try(local.alb_data.dns_name, "")
+    zone_id                = try(local.alb_data.zone_id, "")
     evaluate_target_health = true
   }
 }

@@ -2,7 +2,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: PodMonitor
 metadata:
   name: pakalspot-backend
-  namespace: pakalspot-dev
+  namespace: monitoring
   labels:
     app.kubernetes.io/name: pakalspot-backend
     app.kubernetes.io/component: monitoring
@@ -33,5 +33,5 @@ spec:
           targetLabel: namespace
   namespaceSelector:
     matchNames:
-      - pakalspot-dev
+      - ${namespace}
 

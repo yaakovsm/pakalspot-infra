@@ -9,7 +9,14 @@ resource "helm_release" "prometheus_stack" {
   create_namespace = true
 
   values = [
-    file("${path.module}/values.yaml")
+    file("${path.module}/values.yaml"),
+    yamlencode({
+      prometheusOperator = {
+        admissionWebhooks = {
+          enabled = false  # Disable admission webhook to avoid pre-install hook timeout when cluster is at capacity
+        }
+      }
+    })
   ]
 
   wait    = var.wait_for_helm
@@ -137,7 +144,9 @@ resource "kubernetes_config_map" "grafana_dashboard" {
 }
 
 resource "kubectl_manifest" "podmonitor_backend" {
-  yaml_body = file("${path.module}/podmonitor-backend.yaml")
+  yaml_body = templatefile("${path.module}/podmonitor-backend.yaml", {
+    namespace = var.target_namespace
+  })
 
   depends_on = [
     helm_release.prometheus_stack

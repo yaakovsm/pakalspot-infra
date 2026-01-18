@@ -1,11 +1,11 @@
 output "route53_record_name" {
   description = "The name of the Route 53 record"
-  value       = var.enable_route53_record ? aws_route53_record.main[0].name : null
+  value       = var.enable_route53_record && length(aws_route53_record.main) > 0 ? try(aws_route53_record.main["main"].name, null) : null
 }
 
 output "route53_record_fqdn" {
   description = "The FQDN of the Route 53 record"
-  value       = var.enable_route53_record ? aws_route53_record.main[0].fqdn : null
+  value       = var.enable_route53_record && length(aws_route53_record.main) > 0 ? try(aws_route53_record.main["main"].fqdn, null) : null
 }
 
 output "alb_dns_name" {

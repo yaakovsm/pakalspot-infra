@@ -187,8 +187,9 @@ module "argocd" {
 module "observability" {
   source = "../../modules/K8s Addons/observability"
 
-  aws_region  = var.aws_region
-  common_tags = var.common_tags
+  aws_region       = var.aws_region
+  target_namespace = "pakalspot-dev"
+  common_tags      = var.common_tags
 
   wait_for_helm    = var.wait_for_helm_releases
   helm_timeout     = var.helm_timeout

@@ -27,3 +27,9 @@ variable "wait_for_kubectl" {
   type        = bool
   default     = true
 }
+
+variable "target_namespace" {
+  description = "Kubernetes namespace where the application is deployed (e.g., pakalspot-dev, pakalspot-k8sfinal)"
+  type        = string
+  default     = "pakalspot-dev"
+}

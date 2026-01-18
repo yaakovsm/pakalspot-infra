@@ -42,6 +42,13 @@ resource "time_sleep" "wait_for_cluster" {
   create_duration = var.cluster_wait_duration
 }
 
+# Wait for cluster to be fully ready (nodes ready, system pods running)
+resource "time_sleep" "wait_for_cluster_ready" {
+  depends_on = [module.eks, time_sleep.wait_for_cluster]
+
+  create_duration = "30s" # Give cluster time to stabilize
+}
+
 module "eso-irsa" {
   source            = "../../modules/eso-irsa"
   oidc_provider_arn = module.eks.oidc_provider_arn
@@ -163,7 +170,9 @@ module "app-backend-irsa" {
   depends_on = [module.eks, module.s3]
 }
 
+# ArgoCD Module - Conditional
 module "argocd" {
+  count  = var.enable_argocd ? 1 : 0
   source = "../../modules/K8s Addons/argocd"
 
   argocd_version             = var.argocd_version
@@ -180,15 +189,19 @@ module "argocd" {
 
   depends_on = [
     module.eks,
-    module.aws-load-balancer-controller
+    module.aws-load-balancer-controller,
+    time_sleep.wait_for_cluster_ready
   ]
 }
 
+# Observability Module - Conditional
 module "observability" {
+  count  = var.enable_observability ? 1 : 0
   source = "../../modules/K8s Addons/observability"
 
-  aws_region  = var.aws_region
-  common_tags = var.common_tags
+  aws_region       = var.aws_region
+  target_namespace = "pakalspot-k8sfinal"
+  common_tags      = var.common_tags
 
   wait_for_helm    = var.wait_for_helm_releases
   helm_timeout     = var.helm_timeout
@@ -196,7 +209,8 @@ module "observability" {
 
   depends_on = [
     module.eks,
-    module.external-secrets
+    module.external-secrets,
+    time_sleep.wait_for_cluster_ready
   ]
 }
 
@@ -217,27 +231,20 @@ module "api-gateway" {
 }
 
 # Data source to find the Route53 hosted zone for pakalspot.com
-# This is used for ACM certificate DNS validation records only
-# NOTE: Route53 A records pointing to ALB are managed manually, not by Terraform
+# This is used for Route53 records and ACM certificate DNS validation records
 data "aws_route53_zone" "pakalspot" {
-  count = var.enable_acm_certificate && var.route53_hosted_zone_id == "" ? 1 : 0
+  count = var.route53_domain_name != "" && var.route53_hosted_zone_id == "" ? 1 : 0
   name  = var.route53_domain_name
 }
 
 # Use the provided zone ID if available, otherwise use the data source
-# This is only used for ACM certificate validation records
+# This is used for Route53 records and ACM certificate validation records
 locals {
-  route53_zone_id = var.enable_acm_certificate ? (
+  route53_zone_id = var.route53_domain_name != "" ? (
     var.route53_hosted_zone_id != "" ? var.route53_hosted_zone_id : (
       length(data.aws_route53_zone.pakalspot) > 0 ? data.aws_route53_zone.pakalspot[0].zone_id : ""
     )
   ) : ""
-}
-
-# Data source to reference existing ACM certificate (if provided)
-data "aws_acm_certificate" "existing" {
-  count = var.enable_acm_certificate && var.existing_acm_certificate_arn != "" ? 1 : 0
-  arn   = var.existing_acm_certificate_arn
 }
 
 # ACM Certificate Module (only if not using existing certificate)
@@ -255,6 +262,8 @@ module "acm" {
 }
 
 # Local to get certificate ARN (either from existing or newly created)
+# If existing_acm_certificate_arn is provided, use it directly
+# Otherwise, use the ARN from the ACM module
 locals {
   acm_certificate_arn = var.enable_acm_certificate ? (
     var.existing_acm_certificate_arn != "" ? var.existing_acm_certificate_arn : (
@@ -266,17 +275,21 @@ locals {
 # Route53 Module
 # Automatically creates A record pointing to ALB
 # This replaces manual Route53 record creation
+# NOTE: Route53 record creation requires ALB to exist first
+# Apply in stages: 1) Create infrastructure + deploy app (creates ALB), 2) Apply again to create Route53 record
+# Alternatively, provide alb_name or alb_arn in terraform.tfvars to enable Route53 during first apply
 module "route53" {
-  count  = var.enable_acm_certificate && local.route53_zone_id != "" ? 1 : 0
+  count  = local.route53_zone_id != "" ? 1 : 0
   source = "../../modules/route53"
 
   hosted_zone_id        = local.route53_zone_id
-  domain_name          = var.route53_domain_name
-  cluster_name         = var.cluster_name
+  domain_name           = var.route53_domain_name
+  cluster_name          = var.cluster_name
   enable_route53_record = true
   # alb_name and alb_arn are optional - module will auto-detect ALB by cluster tags
   # The module will find ALB created by Kubernetes ingress with tag: elbv2.k8s.aws/cluster
-  common_tags          = var.common_tags
+  # If ALB doesn't exist yet, Route53 record creation will fail (expected - apply again after ALB is created)
+  common_tags = var.common_tags
 
   depends_on = [
     module.eks,

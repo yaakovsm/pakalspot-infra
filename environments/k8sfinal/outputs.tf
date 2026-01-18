@@ -42,10 +42,26 @@ output "acm_pakalspot_cert_arn" {
 
 output "route53_record_fqdn" {
   description = "The FQDN of the Route53 record pointing to ALB"
-  value       = var.enable_acm_certificate && local.route53_zone_id != "" && length(module.route53) > 0 ? module.route53[0].route53_record_fqdn : null
+  value       = length(module.route53) > 0 ? module.route53[0].route53_record_fqdn : null
 }
 
 output "alb_dns_name" {
   description = "The DNS name of the ALB (for reference)"
-  value       = var.enable_acm_certificate && local.route53_zone_id != "" && length(module.route53) > 0 ? module.route53[0].alb_dns_name : null
+  value       = length(module.route53) > 0 ? module.route53[0].alb_dns_name : null
+}
+
+output "node_group_name" {
+  description = "The actual AWS nodegroup name (with random suffix)"
+  value       = module.eks.node_group_name
+}
+
+output "route53_hosted_zone_id" {
+  description = "The Route53 hosted zone ID"
+  value       = local.route53_zone_id != "" ? local.route53_zone_id : null
+}
+
+# Add alias for consistency with checklist
+output "route53_alb_dns_name" {
+  description = "Alias for alb_dns_name (for compatibility with verification checklist)"
+  value       = length(module.route53) > 0 ? module.route53[0].alb_dns_name : null
 }

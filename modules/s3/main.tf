@@ -90,4 +90,6 @@ data "aws_iam_policy_document" "pakalspot_photos_bucket" {
 resource "aws_s3_bucket_policy" "pakalspot_photos_bucket" {
   bucket = module.s3_bucket.s3_bucket_id
   policy = data.aws_iam_policy_document.pakalspot_photos_bucket.json
+
+  depends_on = [module.s3_bucket]
 }

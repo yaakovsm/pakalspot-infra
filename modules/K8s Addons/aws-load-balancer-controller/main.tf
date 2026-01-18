@@ -319,6 +319,7 @@ resource "helm_release" "aws_load_balancer_controller" {
   values = [
     yamlencode({
       clusterName = var.cluster_name
+      replicaCount = 1
       serviceAccount = {
         create = true
         name   = "aws-load-balancer-controller"

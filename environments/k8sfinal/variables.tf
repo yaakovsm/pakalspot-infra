@@ -220,8 +220,9 @@ variable "s3_bucket_name" {
   default     = "pakalspot-photos-dev"
 }
 variable "backend_s3_principal_arn" {
-  description = "IAM ARN (user/role) that can read/write to pakalspot-photos"
+  description = "IAM ARN (user/role) that can read/write to pakalspot-photos (unused - value comes from module.eks.node_group_iam_role_arn)"
   type        = string
+  default     = "" # Not used - value is passed directly from EKS module
 }
 # ArgoCD variables
 variable "argocd_version" {
@@ -283,6 +284,18 @@ variable "cluster_wait_duration" {
   description = "Duration to wait for EKS cluster to be ready before deploying Helm releases (reduced for dev)"
   type        = string
   default     = "10s"
+}
+
+variable "enable_argocd" {
+  description = "Enable ArgoCD deployment (can be disabled for faster initial setup)"
+  type        = bool
+  default     = true
+}
+
+variable "enable_observability" {
+  description = "Enable Prometheus/Grafana monitoring stack (can be disabled for faster initial setup)"
+  type        = bool
+  default     = false # Disable by default due to resource requirements
 }
 
 # Route 53 variables
