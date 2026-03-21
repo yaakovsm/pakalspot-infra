@@ -214,22 +214,6 @@ module "observability" {
   ]
 }
 
-module "api-gateway" {
-  count  = var.enable_api_gateway ? 1 : 0
-  source = "../../modules/api-gateway"
-
-  api_name = "pakalspot-api-${var.vpc_name}"
-  nlb_name = var.api_gateway_nlb_name
-
-  vpc_id     = module.networking.vpc_id
-  subnet_ids = module.networking.private_subnets
-
-  stage_name  = "k8sfinal"
-  common_tags = var.common_tags
-
-  depends_on = [module.networking, module.eks]
-}
-
 # Data source to find the Route53 hosted zone for pakalspot.com
 # This is used for Route53 records and ACM certificate DNS validation records
 data "aws_route53_zone" "pakalspot" {

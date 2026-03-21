@@ -51,7 +51,7 @@ variable "cluster_name" {
 variable "kubernetes_version" {
   description = "The version of the Kubernetes cluster"
   type        = string
-  default     = "1.29"
+  default     = "1.32"
 }
 variable "enable_irsa" {
   description = "Enable IRSA"
@@ -249,17 +249,6 @@ variable "argocd_controller_replicas" {
   description = "The number of controller replicas of the ArgoCD"
   type        = number
   default     = 1
-}
-# API Gateway variables
-variable "enable_api_gateway" {
-  description = "Enable API Gateway (requires NLB to exist first)"
-  type        = bool
-  default     = false
-}
-variable "api_gateway_nlb_name" {
-  description = "Name of the NLB created by backend service (e.g., k8s-pakalspot-dev-backend-xxxxx)"
-  type        = string
-  default     = ""
 }
 
 variable "wait_for_helm_releases" {

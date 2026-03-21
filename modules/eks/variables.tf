@@ -7,7 +7,7 @@ variable "cluster_name" {
 variable "kubernetes_version" {
   description = "The version of the Kubernetes cluster"
   type        = string
-  default     = "1.29"
+  default     = "1.32"
 }
 variable "enable_irsa" {
   description = "Enable IRSA"

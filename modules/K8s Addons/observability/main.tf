@@ -15,6 +15,9 @@ resource "helm_release" "prometheus_stack" {
         admissionWebhooks = {
           enabled = false  # Disable admission webhook to avoid pre-install hook timeout when cluster is at capacity
         }
+        tls = {
+          enabled = false  # Disable TLS since admission webhooks are disabled
+        }
       }
     })
   ]

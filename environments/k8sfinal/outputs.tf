@@ -25,16 +25,6 @@ output "rds_endpoint" {
   sensitive   = true
 }
 
-output "api_gateway_url" {
-  description = "API Gateway endpoint URL"
-  value       = var.enable_api_gateway ? (length(module.api-gateway) > 0 ? module.api-gateway[0].api_gateway_stage_url : "") : ""
-}
-
-output "api_gateway_endpoint" {
-  description = "API Gateway base endpoint"
-  value       = var.enable_api_gateway ? (length(module.api-gateway) > 0 ? module.api-gateway[0].api_gateway_endpoint : "") : ""
-}
-
 output "acm_pakalspot_cert_arn" {
   description = "The ARN of the ACM certificate (existing or newly created). Use this ARN in the ALB Ingress annotation alb.ingress.kubernetes.io/certificate-arn"
   value       = var.enable_acm_certificate ? local.acm_certificate_arn : null

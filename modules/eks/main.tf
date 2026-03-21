@@ -10,7 +10,10 @@ module "eks" {
     eks-pod-identity-agent = {}
     kube-proxy             = {}
     vpc-cni = {
-      before_compute = true
+      before_compute       = true
+      configuration_values = jsonencode({
+        enableNetworkPolicy = "true"
+      })
     }
   }
   enable_irsa = var.enable_irsa

@@ -8,7 +8,7 @@ private_subnets                          = ["10.0.11.0/24", "10.0.12.0/24"]
 database_subnets                         = ["10.0.21.0/24", "10.0.22.0/24"]
 enable_nat_gateway                       = true
 cluster_name                             = "pakalspot-cluster"
-kubernetes_version                       = "1.29"
+kubernetes_version                       = "1.32"
 enable_irsa                              = true
 endpoint_public_access                   = true
 enable_cluster_creator_admin_permissions = true
@@ -44,8 +44,10 @@ parameters = [
   {
     name  = "character_set_server"
     value = "utf8mb4"
+  },
+  {
     name  = "log_statement"
-    value = "all"  # Options: "none", "ddl", "mod", "all"
+    value = "all" # Options: "none", "ddl", "mod", "all"
   },
   {
     name  = "log_min_duration_statement"

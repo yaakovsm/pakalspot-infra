@@ -55,6 +55,10 @@ resource "helm_release" "argocd" {
       controller = {
         replicas = var.argocd_controller_replicas
       }
+
+      applicationset = {
+        enabled = true
+      }
     })
   ]
 }
