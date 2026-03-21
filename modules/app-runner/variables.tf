@@ -94,6 +94,12 @@ variable "s3_bucket_arn" {
   description = "ARN of S3 bucket for photos (for IAM policy)"
   type        = string
 }
+
+variable "init_seed_bucket_arn" {
+  description = "ARN of S3 bucket containing init_spots.json (read-only for seeding). Set empty to omit."
+  type        = string
+  default     = ""
+}
 variable "db_host" { type = string }
 variable "db_name" { type = string }
 variable "db_user" { type = string }

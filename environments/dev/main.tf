@@ -147,6 +147,7 @@ module "app_runner" {
 
   rds_master_secret_arn           = module.rds.db_instance_master_user_secret_arn
   vpc_connector_security_group_id = aws_security_group.apprunner_vpc_connector.id
+  init_seed_bucket_arn            = data.aws_s3_bucket.init_photos.arn
   common_tags                     = var.common_tags
 
   depends_on = [
